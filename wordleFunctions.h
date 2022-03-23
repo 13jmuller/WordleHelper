@@ -5,13 +5,14 @@
  #include <algorithm>
  #include <vector>
  #include <string>
+ #include <getopt.h>
 
 using namespace std;
 
 struct word
 {
     string wd;
-    int freq[26];
+    vector<int> freq;
 };
 
 struct rightPos
@@ -30,18 +31,36 @@ class Wordle
 {
   private:
     vector<word> wordList;
+    int round;
+    char method;
+    int numSim;
+    int numChars;
+    int numWords;
     string guess;
+    string guessColors;
     vector<rightPos> rightLetters;
     vector<wrongPos> wrongPosLetters;
     vector<char> wrongLetters;
     vector<string> guesses;
-    
+    vector<int> letterFreq;
+    vector<vector<int>> posFreq;
+
   public:
     void errorCheck();
+
+    void playWordle();
+
+    size_t findMin(vector<double> v);
+
+    void get_options(int argc, char **argv);
     
     void readList();
 
-    void readFreq();
+    void suggestFirstC();
 
-    void readPos();
+    void suggestFirstP();
+
+    void suggestFirst();
+
+    void userInput();
 };

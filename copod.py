@@ -47,6 +47,7 @@ letterFreq = {k:v/len(solutionWordList)for k,v in letterOccurances.items()}
 
 # creates dataframe that has letters and frequency on either axis --> sorts them by increasing freqnecy
 # keys are the ltters and values are the frequency --> kinda like a map in C++
+# first column is the order that the letters are encountered in the word list
 letterFreq = pd.DataFrame({'Letter':list(letterFreq.keys()), 'Frequency':list(letterFreq.values())}).sort_values('Frequency', ascending=False)
 print(letterFreq)
 msg2 = "test"
@@ -80,10 +81,30 @@ for word in tqdm(solutionWordList):
 
     letterPositionFreq.head()
 
+# we can discard the positions with 0
+letterFreqPosPossible = letterPositionFreq[letterPositionFreq.index.isin(solutionWordList)]
+
+for col in letterFreqPosPossible.columns:
+    if letterFreqPosPossible[col].sum() ==0:
+        letterFreqPosPossible.drop(col,axis=1,inplace=False)
+        letterPositionFreq.drop(col,axis=1,inplace=False)
+
 # COPOD algorithm
+copod = COPOD(contamination=0.01)
+# fits the data to the copod algorithm
+copod.fit(letterFreqPosPossible)
+# sets the scoress as the decision mark
+letterFreqPosPossible['score']=copod.decision_scores_
+# sorts the values in place
+letterFreqPosPossible.sort_values('score',inplace=True)
+# creates the rankings from 1 to end of list and assigns them
+letterFreqPosPossible['rank'] = range(1,len(letterFreqPosPossible)+1)
+# prints out the first 30 lines of the ranking system with titles
+print(letterFreqPosPossible.head(30)[['score','rank']])
 
-
-
-
-
-
+fig,ax = plt.subplots(figsize=(10,6))
+sns.histplot(np.random.normal(size=1000), stat='density', alpha=0.3)
+ax.vlines(x=0,ymin=0,ymax=0.4, color='#FBEC5D',label='Best Wordle Opener')
+ax.set_xlabel('Numeric Representation of a Word')
+ax.set_ylabel('Density')
+ax.legend()

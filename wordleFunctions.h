@@ -18,19 +18,24 @@ struct word
 struct rightPos
 {
     char letter;
-    int pos;
+    vector<int> rightPos;
+    bool allowMore;
+    int amountAllowed;
 };
 
 struct wrongPos
 {
     char letter;
-    int wrongPos[5];
+    vector<int> wrongPos;
+    bool allowMore;
+    int amountAllowed;
 };
 
 class Wordle
 {
   private:
     vector<word> wordList;
+    vector<char> letLU = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
     int round;
     char method;
     int numSim;
@@ -46,8 +51,6 @@ class Wordle
     vector<vector<int>> posFreq;
 
   public:
-    void errorCheck();
-
     void playWordle();
 
     size_t findMin(vector<double> v);
@@ -56,11 +59,23 @@ class Wordle
     
     void readList();
 
-    void suggestFirstC();
-
-    void suggestFirstP();
-
-    void suggestFirst();
-
     void userInput();
+
+    bool errorCheck(string sq);
+
+    bool findLet(vector<char> v, char c);
+
+    bool findWord(string wd);
+
+    void genList();
+
+    void freqAnalysis();
+
+    void suggestFiveC();
+
+    void suggestFiveP();
+
+    void suggestFive();
+
+    void selectSort(vector<double> &max, vector<int> &maxi);
 };

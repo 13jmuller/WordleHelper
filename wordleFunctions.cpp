@@ -59,7 +59,12 @@ void Wordle::readList()
     z.resize(5, 0);
     letterFreq.resize(26, 0);
     posFreq.resize(26, z);
-    inFile.open("wordlePrompts.txt");
+    inFile.open("wordleFullList.txt");
+    if(!inFile.is_open())
+    {
+        cout << "Could not open word bank! Exiting program.\n";
+        exit(1);
+    }
     while(inFile >> wd)
     {
         vector<int> v;
@@ -74,48 +79,6 @@ void Wordle::readList()
         word w = {wd, v};
         wordList.push_back(w);
         ++numWords;
-    }
-}
-
-void Wordle::suggestFirstC()
-{
-    double magLet = 0;
-    vector<double> max;
-    max.resize(5, -1);
-    vector<int> maxi;
-    maxi.resize(5, 1);
-    for(int i = 0; i < 26; ++i)
-    {
-        magLet += letterFreq[i] * letterFreq[i];
-    }
-    magLet = sqrt(magLet);
-    for(int i = 0; i < numWords; ++i)
-    {
-        double wordMag = 0;
-        double m = 0;
-        for(int j = 0; j < 26; ++j)
-        {
-            m += wordList[i].freq[j] * letterFreq[j];
-            wordMag += wordList[i].freq[j] * wordList[i].freq[j];
-        }
-        wordMag = sqrt(wordMag);
-        double entry = m / (wordMag * magLet);
-        for(int j = 0; j < 5; ++j)
-        {
-            if(entry > max[j])
-            {
-                size_t idx = findMin(max);
-                max[idx] = entry;
-                maxi[idx] = i;
-            }
-            break;
-        }
-
-    }
-    cout << "--------------------Top 5 First Guesses--------------------\n";
-    for(int i = 0; i < 5; ++i)
-    {
-        cout << "Word: " << wordList[maxi[i]].wd << " ----------- Cosine Similarity: " << max[i] << "\n";
     }
 }
 
@@ -141,25 +104,335 @@ void Wordle::userInput()
     cout << "Guess Number " << round << "\n";
     cout << "Enter your guess: ";
     cin >> wd;
-    while(wd.length() != 5)
+    while(!findWord(wd))
     {
-        cout << "Not a 5-letter word, try again!\n";
         cout << "Enter your guess: ";
         cin >> wd;
     }
     cout << "Enter squares ('y' for Yellow, 'g' for Green, '-' for Wrong Letter): ";
     cin >> squares;
-    //while loop error check 5 chars and all y/g/-
+    while(!errorCheck(squares))
+    {
+        cout << "Enter squares ('y' for Yellow, 'g' for Green, '-' for Wrong Letter): ";
+        cin >> squares;
+    }
     guess = wd;
     guessColors = squares;
+    if(squares == "ggggg")
+    {
+        cout << "Congratulations! You won on round " << round << '\n';
+        cout << "The word was: " << wd << '\n';
+        exit(0);
+    }
+    wrongPosLetters.clear();
+    rightLetters.clear();
+    for(int i = 0; i < 26; ++i)
+    {
+        vector<int> idx;
+        char curLet = letLU[i];
+        for(int j = 0; j < 5; ++j)
+        {
+            if(guess[j] == letLU[i])
+            {
+                idx.push_back(j);
+            }
+        }
+        int amt = static_cast<int>(idx.size());
+        bool allowMore = true;
+        vector<int> wp;
+        vector<int> rp;
+        
+        for(size_t j = 0; j < idx.size(); ++j)
+        {
+            
+            if(guessColors[idx[j]] == '-')
+            {
+                --amt;
+                allowMore = false;
+            }
+            else if(guessColors[idx[j]] == 'y')
+            {
+                wp.push_back(idx[j]);
+            }
+            else if(guessColors[idx[j]] == 'g')
+            {
+                rp.push_back(idx[j]);
+            }
+        }
+        if(wp.size() > 0)
+        {
+            wrongPos w = {curLet, wp, allowMore, amt};
+            wrongPosLetters.push_back(w);
+        }
+        if(rp.size() > 0)
+        {
+            rightPos r = {curLet, rp, allowMore, amt};
+            rightLetters.push_back(r);
+        }
+        if(amt == 0 && idx.size() > 0 && !findLet(wrongLetters, curLet))
+        {
+            wrongLetters.push_back(curLet);
+        }
+    }
+}
+
+bool Wordle::findWord(string wd)
+{
+    if(wd.length() != 5)
+    {
+        cout << "Not a 5-letter word, try again!\n";
+        return false;
+    }
+    for(size_t i = 0; i < wordList.size(); ++i)
+    {
+        if(wd == wordList[i].wd)
+        {
+            return true;
+        }
+    }
+    cout << "Word entered is not in the word bank, try again!\n";
+    return false;
+}
+
+bool Wordle::findLet(vector<char> v, char c)
+{
+    for(size_t i = 0; i < v.size(); ++i)
+    {
+        if(c == v[i])
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Wordle::errorCheck(string sq)
+{
+    if(sq.length() != 5)
+    {
+        cout << "Invalid length, try again!\n";
+        return false;
+    }
+    for(int i = 0; i < 5; ++i)
+    {
+        if(sq[i] != 'y' && sq[i] != 'g' && sq[i] != '-')
+        {
+            cout << "Invalid character detected, try again!\n";
+            return false;
+        }
+    }
+    return true;
+}
+
+void Wordle::genList()
+{
+    vector<word> temp;
+    temp = wordList;
+    wordList.clear();
+    bool goodWord;
+    for(size_t i = 0; i < temp.size(); ++i)
+    {
+        goodWord = true;
+        for(int j = 0; j < 5; ++j)
+        {
+            for(size_t k = 0; k < wrongLetters.size(); ++k)
+            {
+                if(temp[i].wd[j] == wrongLetters[k])
+                {
+                    goodWord = false;
+                    break;
+                }
+            }
+            for(size_t k = 0; k < wrongPosLetters.size(); ++k)
+            {
+                if(temp[i].freq[static_cast<int>(wrongPosLetters[k].letter - 97)] == 0)
+                {
+                    goodWord = false;
+                    break;
+                }
+                if(temp[i].wd[j] == wrongPosLetters[k].letter)
+                {
+                    if((temp[i].freq[static_cast<int>(wrongPosLetters[k].letter - 97)] != wrongPosLetters[k].amountAllowed && !wrongPosLetters[k].allowMore)
+                    || (temp[i].freq[static_cast<int>(wrongPosLetters[k].letter - 97)] < wrongPosLetters[k].amountAllowed && wrongPosLetters[k].allowMore))
+                    {
+                        goodWord = false;
+                        break;
+                    }
+                    for(size_t n = 0; n < wrongPosLetters[k].wrongPos.size(); ++n)
+                    {
+                        if(j == wrongPosLetters[k].wrongPos[n])
+                        {
+                            goodWord = false;
+                            break;
+                        }
+                    }
+                }
+            }
+            for(size_t k = 0; k < rightLetters.size(); ++k)
+            {
+                if(temp[i].freq[static_cast<int>(rightLetters[k].letter - 97)] == 0)
+                {
+                    goodWord = false;
+                    break;
+                }
+                if(((temp[i].freq[static_cast<int>(rightLetters[k].letter - 97)] != rightLetters[k].amountAllowed && !rightLetters[k].allowMore)
+                || (temp[i].freq[static_cast<int>(rightLetters[k].letter - 97)] < rightLetters[k].amountAllowed && rightLetters[k].allowMore)) && temp[i].wd[j] == rightLetters[k].letter)
+                {
+                    goodWord = false;
+                    break;
+                }
+                if(temp[i].wd[j] == rightLetters[k].letter)
+                {
+                    for(size_t n = 0; n < rightLetters[k].rightPos.size(); ++n)
+                    {
+                        if(temp[i].wd[rightLetters[k].rightPos[n]] != rightLetters[k].letter)
+                        {
+                            goodWord = false;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        if(goodWord)
+        {
+            wordList.push_back(temp[i]);
+        }
+    }
+}
+
+void Wordle::freqAnalysis()
+{
+    for(int i = 0; i < 26; ++i)
+    {
+        letterFreq[i] = 0;
+        for(int j = 0; j < 5; ++j)
+        {
+            posFreq[i][j] = 0;
+        }
+    }
+    numChars = 0;
+    numWords = 0;
+    for(size_t i = 0; i < wordList.size(); ++i)
+    {
+        for(int j = 0; j < 5; ++j)
+        {
+            ++letterFreq[static_cast<int>(wordList[i].wd[j] - 97)];
+            ++posFreq[static_cast<int>(wordList[i].wd[j] - 97)][j];
+            ++numChars;
+        }
+        ++numWords;
+    }
+}
+
+void Wordle::selectSort(vector<double> &max, vector<int> &maxi)
+{
+    for(int i = 0; i < numWords - 1; ++i)
+    {
+        int mi = i;
+        for(int j = i + 1; j < numWords; ++j)
+        {
+            if(max[j] > max[mi])
+            {
+                mi = j;
+            }
+        }
+        swap(max[i], max[mi]);
+        swap(maxi[i], maxi[mi]);
+    }
+}
+
+void Wordle::suggestFiveC()
+{
+    double magLet = 0;
+    vector<double> max;
+    max.resize(numWords, -1);
+    vector<int> maxi;
+    maxi.resize(numWords, 1);
+    for(int i = 0; i < 26; ++i)
+    {
+        magLet += letterFreq[i] * letterFreq[i];
+    }
+    magLet = sqrt(magLet);
+    for(int i = 0; i < numWords; ++i)
+    {
+        double wordMag = 0;
+        double m = 0;
+        for(int j = 0; j < 26; ++j)
+        {
+            m += wordList[i].freq[j] * letterFreq[j];
+            wordMag += wordList[i].freq[j] * wordList[i].freq[j];
+        }
+        wordMag = sqrt(wordMag);
+        double entry = m / (wordMag * magLet);
+        max[i] = entry;
+        maxi[i] = i;
+    }
+    selectSort(max, maxi);
+    cout << "--------------------Top "<< min(5, static_cast<int>(wordList.size())) << " Guesses--------------------\n";
+    for(int i = 0; i < min(5, static_cast<int>(wordList.size())); ++i)
+    {
+        cout << "Word: " << wordList[maxi[i]].wd << " ----------- Cosine Similarity: " << max[i] << "\n";
+    }
+}
+
+void Wordle::suggestFiveP()
+{
+    double magLet = 0;
+    vector<double> max;
+    max.resize(numWords, -1);
+    vector<int> maxi;
+    maxi.resize(numWords, 1);
+    for(int i = 0; i < 26; ++i)
+    {
+        magLet += letterFreq[i] * letterFreq[i];
+    }
+    magLet = sqrt(magLet);
+    for(int i = 0; i < numWords; ++i)
+    {
+        double wordMag = 0;
+        double m = 0;
+        for(int j = 0; j < 5; ++j)
+        {
+            m += posFreq[static_cast<int>(wordList[i].wd[j] - 97)][j];
+        }
+        wordMag = sqrt(5);
+        double entry = m / (wordMag * magLet);
+        max[i] = entry;
+        maxi[i] = i;
+    }
+    selectSort(max, maxi);
+    cout << "--------------------Top "<< min(5, static_cast<int>(wordList.size())) << " Guesses--------------------\n";
+    for(int i = 0; i < min(5, static_cast<int>(wordList.size())); ++i)
+    {
+        cout << "Word: " << wordList[maxi[i]].wd << " ----------- Cosine Similarity: " << max[i] << "\n";
+    }
+}
+
+void Wordle::suggestFive()
+{
+    switch(method)
+    {
+        case 'c':
+            suggestFiveC();
+            break;
+        case 'p':
+            suggestFiveP();
+            break;
+        default:
+            cout << "Invalid method ... exiting\n";
+            exit(1);
+    }
 }
 
 void Wordle::playWordle()
 {
     while(round < 7)
     {
+        suggestFive();
         userInput();
-        //process and suggest
+        genList();
+        freqAnalysis();
         ++round;
     }
     cout << "Sorry, you lose!\n";

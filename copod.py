@@ -56,6 +56,7 @@ print(msg2)
 fig,ax = plt.subplots(figsize= (10,6))
 sns.barplot(x = 'Letter', y='Frequency', data=letterFreq)
 ax.set_title('Frequency of Letters in all Possible Guesses')
+plt.show()
 
 # position frequency
 letterFreqCols = []
@@ -104,7 +105,9 @@ print(letterFreqPosPossible.head(30)[['score','rank']])
 
 fig,ax = plt.subplots(figsize=(10,6))
 sns.histplot(np.random.normal(size=1000), stat='density', alpha=0.3)
-ax.vlines(x=0,ymin=0,ymax=0.4, color='#FBEC5D',label='Best Wordle Opener')
+sns.color_palette("deep")
+ax.vlines(x=0,ymin=0,ymax=0.4, color='#FF0000',label='Best Wordle Opener using COPOD')
 ax.set_xlabel('Numeric Representation of a Word')
 ax.set_ylabel('Density')
 ax.legend()
+plt.show()

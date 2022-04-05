@@ -394,10 +394,77 @@ void Wordle::suggestFiveP()
         double m = 0;
         for(int j = 0; j < 5; ++j)
         {
-            m += posFreq[static_cast<int>(wordList[i].wd[j] - 97)][j];
+            double add = posFreq[static_cast<int>(wordList[i].wd[j] - 97)][j];
+            if(round == 1)
+            {
+                if(j == 0 && (wordList[i].wd[0] == 'k' || wordList[i].wd[0] == 'y' || wordList[i].wd[0] == 'z'))
+                {
+                    add /= 2;
+                }
+                else if(j == 1 && (wordList[i].wd[1] == 'y' || wordList[i].wd[1] == 'z'))
+                {
+                    add /= 2;
+                }
+                else if(j == 2 && (wordList[i].wd[2] == 'h' || wordList[i].wd[2] == 'j' || wordList[i].wd[2] == 'k' || wordList[i].wd[2] == 'q' || wordList[i].wd[2] == 'x' || wordList[i].wd[2] == 'y'))
+                {
+                    add /= 2;
+                }
+                else if(j == 3)
+                {
+                    if(wordList[i].wd[3] == 'c')
+                    {
+                        add *= 2;
+                    }
+                    else if(wordList[i].wd[3] == 'j' || wordList[i].wd[3] == 'y')
+                    {
+                        add /= 2;
+                    }
+                }
+                else if(j == 4)
+                {
+                    if(wordList[i].wd[4] == 'h' || wordList[i].wd[4] == 'k' || wordList[i].wd[4] == 'p')
+                    {
+                        add *= 2;
+                    }
+                    else if(wordList[i].wd[4] == 's' || wordList[i].wd[4] == 'u')
+                    {
+                        add /= 10;
+                    }
+                    else if(wordList[i].wd[4] == 'i')
+                    {
+                        add /= 2;
+                    }
+                }
+            }
+            m += add;
         }
         wordMag = sqrt(5);
         double entry = m / (wordMag * magLet);
+        int gcnt = 0, ycnt = 0;
+        if(round > 1)
+        {
+            for(int j = 0; j < 5; ++j)
+            {
+                if(guessColors[j] == 'g')
+                {
+                    ++gcnt;
+                }
+                else if(guessColors[j] == 'y')
+                {
+                    ++ycnt;
+                }
+            }
+        }
+        if(ycnt < 4 && gcnt < 3 && (gcnt + ycnt) < 5)
+        {
+            for(int j = 0; j < 26; ++j)
+            {
+                if(wordList[i].freq[j] > 1)
+                {
+                    entry /= sqrt(wordList[i].freq[j]);
+                }
+            }
+        }
         max[i] = entry;
         maxi[i] = i;
     }
@@ -405,7 +472,7 @@ void Wordle::suggestFiveP()
     cout << "--------------------Top "<< min(5, static_cast<int>(wordList.size())) << " Guesses--------------------\n";
     for(int i = 0; i < min(5, static_cast<int>(wordList.size())); ++i)
     {
-        cout << "Word: " << wordList[maxi[i]].wd << " ----------- Cosine Similarity: " << max[i] << "\n";
+        cout << "Word: " << wordList[maxi[i]].wd << " ----------- Word Score: " << max[i] << "\n";
     }
 }
 

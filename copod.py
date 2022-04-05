@@ -1,6 +1,7 @@
 # Implementation of COPOD Machine Learning Algorithm
 
 # Frequency Analysis on Word list
+from operator import index
 from unittest import result
 import numpy as np
 import pandas as pd
@@ -35,7 +36,7 @@ alpha = list(string.ascii_lowercase)
 
 # reads in the word lists from text files
 possibleWordList = readWordList("wordleAllowedGuesses.txt")
-solutionWordList = readWordList("wordlePrompts.txt")
+solutionWordList = readWordList("wordleFullList.txt")
 
 # makes dictionary for occurances of each letter
 totalWords = ''.join(solutionWordList)
@@ -98,11 +99,17 @@ copod.fit(letterFreqPosPossible)
 letterFreqPosPossible['score']=copod.decision_scores_
 # sorts the values in place
 letterFreqPosPossible.sort_values('score',inplace=True)
+
 # creates the rankings from 1 to end of list and assigns them
 letterFreqPosPossible['rank'] = range(1,len(letterFreqPosPossible)+1)
 # prints out the first 30 lines of the ranking system with titles
 print(letterFreqPosPossible.head(30)[['score','rank']])
-
+rank = letterFreqPosPossible.drop('score', axis=1)
+print(rank.index)
+scores= letterFreqPosPossible['score']
+np.savetxt("CopodRanks.txt", scores, delimiter=",", newline='\n',fmt= '% f')
+rankings = letterFreqPosPossible.index.tolist()
+np.savetxt("Copod_starting_words.txt", rankings, delimiter=",", newline='\n',fmt= '% s')
 fig,ax = plt.subplots(figsize=(10,6))
 sns.histplot(np.random.normal(size=1000), stat='density', alpha=0.3)
 sns.color_palette("deep")

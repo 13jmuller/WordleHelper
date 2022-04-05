@@ -44,7 +44,7 @@ int main()
      }
     rankoutFile.open("CopodStartingRanks.csv");
     for( size_t i = 0; i < ranks.size(); i++){
-    rankoutFile <<"\""<< ranks.at(i) << "\", ";
+    rankoutFile << ranks.at(i) << ", ";
     }
     rankinFile.close();
     rankoutFile.close();

@@ -11,8 +11,8 @@ class Greedy(object):
         self.squares = ["-","-","-","-","-"]
         self.guess = ""
         self.stage = 1
-        self.gamelist = self.get_list(WORDSFILE)
-        self.wordf = self.get_list(WORDSFILE)
+        self.gamelist = self.get_list(WORDSFILE).copy()
+        self.wordf = self.get_list(WORDSFILE).copy()
         self.previouslistlen = 0
         self.list_size = 0
         self.exhausted_letters = []
@@ -99,7 +99,7 @@ class Greedy(object):
         self.squares = ["-","-","-","-","-"]
         self.guess = ""
         self.stage = 1
-        self.gamelist = self.wordf
+        self.gamelist = self.wordf.copy()
         self.previouslistlen = 0
         self.list_size = 0
         self.exhausted_letters = []
@@ -164,7 +164,11 @@ class Greedy(object):
         if p==0:
             return 0
         return p*math.log(1/p,2)
-
+    def probsum(self, n):
+        p = n/12966
+        if p==0:
+            return 0
+        return p
     """
     wordle game
     """

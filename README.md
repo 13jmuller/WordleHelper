@@ -13,4 +13,4 @@ First you should download the zip file, which you already have done to access th
 First you want to activate the virtual enviornment with ``` source venv/bin/activate ```. You should then see the bash terminal change to accomodate this by having (venv) prior to your normal bash. Then you will run ``` python3 copod.py ```.
 
 ## Greedy Heuristics ##
-
+Last algorithm to allow analysis.

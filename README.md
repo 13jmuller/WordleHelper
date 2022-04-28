@@ -14,7 +14,20 @@ Once the program is running, it should prompt you with the top 5 guesses based o
 Note: type "ggggg" when you win for the program to congratulate you :)
 
 ## Copule Outlier Detection ##
-First you want to activate the virtual enviornment with ``` source venv/bin/activate ```. You should then see the bash terminal change to accomodate this by having (venv) prior to your normal bash. Then you will run ``` python3 copod.py ```. The results of this will produce a variety of frequency analysis graphs that show letter frequency. Additionally, there will be a graph that shows the Distribution analysis to find the best starter word. Lastly, the top ranked words will be output to show the User the best first guesses. One thing to make note of is that this code only shows the best first guess. The code on the website implements the whole game by eliminating words from the potential guess list. 
+First you want to make sure that you have the following libraries installed on your python terminal:
+```from operator import index```  
+```from unittest import result```  
+```import numpy as np```  
+```import pandas as pd```  
+```import matplotlib.pyplot as plt```  
+```import seaborn as sns```  
+```import string```  
+```import re```  
+```from typing import List```  
+```from collections import Counter```  
+```from tqdm import tqdm```  
+```from pyod.models.copod import COPOD```  
+If you have issues with any of these libraries make sure that you have them downloaded. Use ```pip -install seaborn``` to install the seaborn library. Repeat this process for the other libraries. If you have further issues, use Stackover Flow to debug your local machine. Then you will run ``` python3 copod.py ```. The results of this will produce a variety of frequency analysis graphs that show letter frequency. Additionally, there will be a graph that shows the Distribution analysis to find the best starter word. Lastly, the top ranked words will be output to show the User the best first guesses. One thing to make note of is that this code only shows the best first guess. The code on the website implements the whole game by eliminating words from the potential guess list. 
 
 ## Greedy Heuristics ##
-The final program is simply one that runs the greedy heuristic to generate the expected value scores for each word. Same as the COPOD python file, you will want to activate the virtual enviornment with ``` source venv/bin/activate ```. Then, you simply need to navigate to the directory containing GreedyHeuristic.py. Then you will run ``` python3 GreedyHeuristic.py ```. This program will then compute the expected value summation for each of the 12,966 words, which may take a while (approximately 36 hours). At the end, the program will create a new .txt file containing each word and its expected value, comma separated. During the processing, the program will also concurrently print the word in progress, along with its expected value once it's done with the summation. The completed .txt file containing each word and score is "GreedyHeuristicRank.txt".
+The final program is simply one that runs the greedy heuristic to generate the expected value scores for each word. You simply need to navigate to the directory containing GreedyHeuristic.py. Then you will run ``` python3 GreedyHeuristic.py ```. This program will then compute the expected value summation for each of the 12,966 words, which may take a while (approximately 36 hours). At the end, the program will create a new .txt file containing each word and its expected value, comma separated. During the processing, the program will also concurrently print the word in progress, along with its expected value once it's done with the summation. The completed .txt file containing each word and score is "GreedyHeuristicRank.txt".

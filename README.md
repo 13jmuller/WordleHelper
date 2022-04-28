@@ -13,8 +13,8 @@ Once the program is running, it should prompt you with the top 5 guesses based o
 
 Note: type "ggggg" when you win for the program to congratulate you :)
 
-## Copule Outlier Detection ##
-First you want to make sure that you have the following libraries installed on your python terminal:
+## Copula Outlier Detection ##
+First you want to make sure that you have the following libraries installed on your python terminal:  
 ```from operator import index```  
 ```from unittest import result```  
 ```import numpy as np```  

@@ -1,5 +1,4 @@
 import math
-from tabnanny import verbose 
 def split_str_to_char(str):
     return [char for char in str]
 
